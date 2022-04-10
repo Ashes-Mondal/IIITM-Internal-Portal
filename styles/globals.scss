@@ -43,7 +43,7 @@ a {
   .ql-editor {
     min-height: 4in;
     padding: 12px 1rem;
-    font-size: 18px;
+    font-size: 14px;
   }
 }
 
@@ -57,11 +57,21 @@ a {
   padding-bottom: 1rem;
 }
 
+.quill_container {
+  .ql-toolbar.ql-snow{
+    display: none;
+  }
+  .ql-editor {
+    min-height: 4in;
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
 // .ql-editor {
-//   // font-size: 18px;
-//   min-height: 5in;
-//   padding: 1vw !important;
-//   // font-size: Max(1.5vw,18px);
+//   min-height: 4in!important;
+//   padding: 12px 1rem!important;
+//   font-size: 18px!important;
 // }
 
 .ql-snow .ql-editor img {

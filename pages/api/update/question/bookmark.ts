@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSession } from "next-auth/react"
-import dbConnect from '../../../lib/dbConnect'
-import users from '../../../models/users'
-import { ObjectId } from 'mongoose'
+import dbConnect from '../../../../lib/dbConnect'
+import users from '../../../../models/users'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method != "PUT") {

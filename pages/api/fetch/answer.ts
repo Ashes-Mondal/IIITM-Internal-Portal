@@ -17,11 +17,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	//*Client is signedIn
 	try {
 		await dbConnect()
-		const resp = await answers.find({ userID: id }).populate("questionID");
-		let ques = resp.map(q => {
-			return {id:q.questionID._id,title:q.questionID.questionTitle,aid:q._id}
-		})
-		res.status(200).json({ data: ques, error: null })
+		const {id:aid} = req.query
+		console.log(aid)
+		let theAnswer = await answers.findById(aid).populate('userID');
+
+		res.status(200).json({ data: theAnswer, error: null })
 	} catch (error) {
 		console.log(error)
 		res.status(500).json({ data: null, error: "INTERNAL_SERVER_ERROR" })

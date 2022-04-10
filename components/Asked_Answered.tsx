@@ -36,7 +36,7 @@ export default function Asked_Answered() {
 			{
 				answered.map((que, idx) => {
 					return (
-						<Link key={idx} passHref href={`/stackoverflow/question/${que.id}`}>
+						<Link key={idx} passHref href={`/stackoverflow/question/${que.id}?aid=${que.aid}`}>
 							<p className='text-xs cursor-pointer text-sky-600 hover:text-blue-400 underline mb-2'>
 								{que.title}
 							</p>

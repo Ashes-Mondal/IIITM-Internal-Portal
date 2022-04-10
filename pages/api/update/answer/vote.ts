@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSession } from "next-auth/react"
-import dbConnect from '../../../lib/dbConnect'
-import questions from '../../../models/questions'
+import dbConnect from '../../../../lib/dbConnect'
+import answers from '../../../../models/answers'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method != "PUT") {
@@ -18,22 +18,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	//*Client is signedIn
 	try {
 		await dbConnect()
+		console.log(req.body)
 		if(req.body.prevVal ===1)
 		{
-			await questions.findByIdAndUpdate(req.body.qid,{ $pull:{upvote:id} });
+			await answers.findByIdAndUpdate(req.body.aid,{ $pull:{upvote:id} });
 		}
 		else if(req.body.prevVal ===-1)
 		{
-			await questions.findByIdAndUpdate(req.body.qid,{ $pull:{downvote:id} });
+			await answers.findByIdAndUpdate(req.body.aid,{ $pull:{downvote:id} });
 		}
 
 		if(req.body.newVal === 1)
 		{
-			await questions.findByIdAndUpdate(req.body.qid,{ $addToSet:{upvote:id} });
+			await answers.findByIdAndUpdate(req.body.aid,{ $addToSet:{upvote:id} });
 		}
 		else if(req.body.newVal ===-1)
 		{
-			await questions.findByIdAndUpdate(req.body.qid,{ $addToSet:{downvote:req.body.uid} });
+			await answers.findByIdAndUpdate(req.body.aid,{ $addToSet:{downvote:id} });
 		}
 		
 		res.status(200).json({ data: "SUCCESS", error: null })

@@ -13,7 +13,7 @@ interface Question {
 	comments: Types.ArraySubdocument;
 	views: Number;
 	date: any
-}
+};
 
 // 2. Create a Schema corresponding to the document interface.
 const schema = new Schema<Question>(
@@ -25,15 +25,16 @@ const schema = new Schema<Question>(
 		answers: [{ type: Schema.Types.ObjectId, ref: "Answers" }],
 
 		tags: [{ type: String }],
-		upvote: [{ type: Schema.Types.ObjectId, ref: "User"}],
-		downvote:[{ type: Schema.Types.ObjectId, ref: "User"}],
-		comments:[{ type: Schema.Types.ObjectId, ref: "Comments"}],
+		upvote: [{ type: Schema.Types.ObjectId, ref: "User" }],
+		downvote: [{ type: Schema.Types.ObjectId, ref: "User" }],
+		comments: [{ type: Schema.Types.ObjectId, ref: "Comments" }],
 		views: { type: Number, default: 0 },
 
-		date: { type: Schema.Types.Date, default: Date.now() },
-	}
+		date: { type: Schema.Types.Date, default: Date.now },
+
+	}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
 
 // 3. Create a Model.
-export {schema as schema}
+export { schema as schema }
 export default models.Questions || model('Questions', schema);

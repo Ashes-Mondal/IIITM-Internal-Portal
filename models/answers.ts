@@ -24,8 +24,8 @@ const schema = new Schema<Answers>(
 		upvote: [{ type: Schema.Types.ObjectId, ref: "User"}],
 		downvote:[{ type: Schema.Types.ObjectId, ref: "User"}],
 		
-		date:{ type: Schema.Types.Date, default:Date.now() },
-	}
+		date:{ type: Schema.Types.Date, default:Date.now },
+	},{ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
 
 export {schema as schema}

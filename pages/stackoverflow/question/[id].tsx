@@ -20,10 +20,13 @@ import Head from 'next/head';
 import hljs from 'highlight.js'
 import { RWebShare } from "react-web-share";
 import { Button } from '@chakra-ui/react';
-import { type } from 'os';
 import users from '../../../models/users';
 import answers from '../../../models/answers';
-import { Input } from '@chakra-ui/react'
+import { Textarea, Text } from '@chakra-ui/react'
+import Link from 'next/link';
+import avatar from '../../../images/avatar2.svg'
+import { Spinner } from '@chakra-ui/react'
+
 
 const QuillNoSSRWrapper = dynamic(import('react-quill'), {
 	ssr: false,
@@ -78,11 +81,14 @@ const formats = [
 ]
 
 function getFormattedDate(dat) {
-	let d = new Date(dat);
+	if (!dat) return
+	let d = new Date(dat).toLocaleDateString();
+	let t = new Date(dat).toLocaleString();
 
-	let str = ('0' + d.getDate()).slice(-2) + "-" + ('0' + (d.getMonth() + 1)).slice(-2) + "-" + d.getFullYear() + " " + ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2) + ":" + ('0' + d.getSeconds()).slice(-2);
 
-	return str;
+	// let str = ('0' + d.getDate()).slice(-2) + "-" + ('0' + (d.getMonth() + 1)).slice(-2) + "-" + d.getFullYear() + " " + ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2) + ":" + ('0' + d.getSeconds()).slice(-2);
+
+	return t;
 }
 
 const getNumString = (num) => {
@@ -93,10 +99,194 @@ const getNumString = (num) => {
 	return num
 }
 
-export default function Question({ question, vote, bookmarked, yourAnswer }) {
+const Answer = ({ id, session }) => {
+	//getNumString(question.upvote.length + question.downvote.length)
+	//vote
+	const [details, setAnswer] = useState(null)
+	const [voted, setVote] = useState(0)//+1 0 -1
+	const [votes, setVotes] = useState(0)
+
+	const [bookMarked, setBookmarked] = useState(false)
+	const [comment, setComment] = useState('')
+	const [commentList, setCommentList] = useState([])
+	const [showComments, setshowComments] = useState(false)
+
+	// console.log("details",details)
+	const handleVote = (num) => {
+		const data = {
+			prevVal: voted,
+			newVal: num,
+			aid: id
+		}
+		let c = votes
+		if (num === 0) c--;
+		else if (voted === 0) ++c;
+
+		axios.put('/api/update/answer/vote', data).then(resp => { setVote(num); setVotes(getNumString(c)) }).catch((e) => { alert('Failed to vote!') })
+	}
+
+	const handleBookMark = (status) => {
+		const data = {
+			status,
+			aid: id
+		}
+		axios.put('/api/update/answer/bookmark', data).then(resp => { setBookmarked(status); }).catch((e) => { alert('Failed to bookmark!') })
+	}
+
+
+	const answeredDate = getFormattedDate(details?.date)
+	const siteURL = window.location.href
+	const handleCommentPost = () => {
+		if (comment.length < 1) return
+		const data = {
+			aid: id,
+			comment,
+		}
+		axios.post('/api/post/answer/comment', data).then(resp => {
+			setCommentList([...commentList, resp.data.data]);
+			setComment('');
+		}).catch((e) => { alert('Failed to post comment!') })
+	}
+
+	useEffect(() => {
+		axios.get(`/api/fetch/answer?id=${id}`).then(resp => {
+			setAnswer(resp.data.data)
+			setCommentList(resp.data.data.comments)
+			const uid = session.user.id
+			if (resp.data.data.upvote.includes(uid)) {
+				setVote(1)
+			}
+			else if (resp.data.data.downvote.includes(uid)) {
+				setVote(-1)
+			}
+			setVotes(resp.data.data.upvote.length + resp.data.data.downvote.length)
+			axios.get(`/api/fetch/user`).then(resp => {
+				if (resp.data.data.starredAnswers?.includes(id)) {
+					setBookmarked(true)
+				}
+			})
+		}).catch(err => console.error(err))
+	}, [])
+
+	return (
+		<div id={id} className='container mx-auto  border border-slate-300'>
+			<div className='pt-4 pb-2 border-b border-b-slate-300 px-2'>
+				<div className='flex justify-between items-center md:px-5 pt-4'>
+					<div>
+						Answered: <span className='font-bold text-sm'>{answeredDate}</span>
+					</div>
+					<div>
+						<Link passHref href={`/profile/${details?.userID._id}`}>
+							<span className='cursor-pointer text-sky-600 hover:text-blue-400 flex gap-1'>
+								{details?.userID.image == null ? <Image src={avatar} alt="" width={14} height={12} />
+									:
+									<img className='rounded-xl border border-black cursor-pointer' src={`${details?.userID.image}`} alt="" width={20} height={20} />}
+								{details?.userID.name}
+							</span>
+						</Link>
+					</div>
+				</div>
+			</div>
+			<div className='flex' >
+				<div className='py-16 flex flex-col items-center gap-2 md:w-16'>
+					<div>
+						{
+							voted === 1 ? <BsFillArrowUpCircleFill size={25} className='cursor-pointer' onClick={() => { handleVote(0) }} />
+								:
+								<BsArrowUpCircle size={25} className='cursor-pointer' onClick={() => { handleVote(1) }} />
+						}
+					</div>
+					{votes}
+					<div>
+						{
+							voted === -1 ? <BsFillArrowDownCircleFill size={25} className='cursor-pointer' onClick={() => { handleVote(0) }} />
+								:
+								<BsArrowDownCircle size={25} className='cursor-pointer' onClick={() => { handleVote(-1) }} />
+						}
+					</div>
+					<div>
+						{
+							bookMarked ?
+								<BsBookmarksFill size={25} className='cursor-pointer' onClick={() => { handleBookMark(false) }} />
+								:
+								<BsBookmarks size={25} className='cursor-pointer' onClick={() => { handleBookMark(true) }} />
+						}
+					</div>
+				</div>
+				<QuillNoSSRWrapper readOnly modules={mods} value={details?.answer} theme="snow" className='quill_container' />
+			</div>
+			<div className='px-2 py-2'>
+				<span className='text-lg font-bold pl-4 md:pl-8'>Comments: ({getNumString(commentList.length)})</span> <span className='cursor-pointer text-sky-400 underline text-sm' onClick={() => { setshowComments(!showComments) }}> {showComments ? "Hide comments" : "Show comments"}</span>
+
+				{
+					showComments ? commentList.length ?
+						commentList.map((id, idx) => {
+							return <Comment key={idx} id={id} />
+						})
+						:
+						<div className='text-sm pl-4 md:pl-8 pb-2'>No Commnets ...</div>
+						:
+						null
+				}
+				<div className='pr-2 flex gap-2 pb-2 pl-4 md:pl-8 items-center'>
+					<Textarea maxLength={500} value={comment} minHeight={'50px'} resize={'none'} variant={'filled'} placeholder='Add a comment' size='sm' onChange={(e => { setComment(e.target.value) })} /><span className='cursor-pointer text-sky-400 hover:underline text-sm' onClick={handleCommentPost}> Post</span>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+const Comment = ({ id }) => {
+	const [details, setcomment] = useState(null)
+	const askedDate = getFormattedDate(details?.date)
+
+	useEffect(() => {
+		axios.get(`/api/fetch/comment?id=${id}`).then(resp => { setcomment(resp.data.data) }).catch(err => console.error(err))
+	}, [])
+
+	return (
+		<>
+			{
+				details ? (
+					< div className='mb-2 border p-2 ml-8' >
+						<div className='text-xs' >
+							{details?.comment}
+						</div >
+						<div className='flex flex-wrap justify-end gap-2 text-xs mt-1'>
+							<Link passHref href={`/profile/${details?.userID._id}`}>
+								<span className='cursor-pointer text-sky-600 hover:text-blue-400 flex gap-1'>
+									{details?.userID.image == null ? <Image src={avatar} alt="" width={12} height={12} />
+										:
+										<img className='rounded-xl border border-black cursor-pointer' src={`${details?.userID.image}`} alt="" width={12} height={12} />}
+									{details?.userID.name}
+								</span>
+							</Link>
+							<span className="font-semibold">
+								commented on {askedDate}
+							</span>
+						</div>
+					</div >
+				) :
+					<div className='mb-2 border p-2 ml-8 flex justify-center items-center'>
+						<Spinner
+							thickness='2px'
+							speed='0.7s'
+							emptyColor='gray.200'
+							color='blue.500'
+							size='xs'
+						/>
+					</div>
+			}
+
+		</>
+	)
+}
+
+export default function Question({ question, vote, bookmarked, yourAnswerID, scroll }) {
 	question = JSON.parse(question)
-	yourAnswer = JSON.parse(yourAnswer)
-	console.log(question, yourAnswer)
+	yourAnswerID = JSON.parse(yourAnswerID)
+
+
 	const { data, status } = useSession()
 	const session: any = data
 	const router = useRouter()
@@ -106,11 +296,12 @@ export default function Question({ question, vote, bookmarked, yourAnswer }) {
 
 	const [bookMarked, setBookmarked] = useState(bookmarked)
 	const [answer, setAnswer] = useState('')
+	const [comment, setComment] = useState('')
+	const [commentList, setCommentList] = useState(question.comments)
+
+
 	const [isLoading, setisLoading] = useState(false)
 	const [showComments, setshowComments] = useState(false)
-
-
-	console.log(question)
 
 	const handleVote = (num) => {
 		const data = {
@@ -118,7 +309,11 @@ export default function Question({ question, vote, bookmarked, yourAnswer }) {
 			newVal: num,
 			qid: question._id
 		}
-		axios.put('/api/update/vote', data).then(resp => { setVote(num); setVotes(getNumString(vote + (num !== 0))) }).catch((e) => { alert('Failed to vote!') })
+		let c = votes
+		if (num === 0) c--;
+		else if (voted === 0) ++c;
+
+		axios.put('/api/update/question/vote', data).then(resp => { setVote(num); setVotes(getNumString(c)) }).catch((e) => { alert('Failed to vote!') })
 	}
 
 	const handleBookMark = (status) => {
@@ -126,7 +321,7 @@ export default function Question({ question, vote, bookmarked, yourAnswer }) {
 			status,
 			qid: question._id
 		}
-		axios.put('/api/update/bookmark', data).then(resp => { setBookmarked(status); }).catch((e) => { alert('Failed to bookmark!') })
+		axios.put('/api/update/question/bookmark', data).then(resp => { setBookmarked(status); }).catch((e) => { alert('Failed to bookmark!') })
 	}
 
 	const handleSubmit = async () => {
@@ -152,7 +347,24 @@ export default function Question({ question, vote, bookmarked, yourAnswer }) {
 		if (answer.length && !isLoading) return false;
 		return true;
 	}
+	const handleCommentPost = () => {
+		if (comment.length < 1) return
+		const data = {
+			qid: question._id,
+			comment,
+		}
+		axios.post('/api/post/question/comment', data).then(resp => {
+			setCommentList([...commentList, resp.data.data]);
+			setComment('');
+		}).catch((e) => { alert('Failed to post comment!') })
+	}
 
+	useEffect(() => {
+		if (scroll) {
+			const Element =  document.getElementById(scroll)
+			Element.scrollIntoView({ behavior: 'smooth' })
+		}
+	}, [])
 	return (
 		<>
 			<Head>
@@ -213,23 +425,39 @@ export default function Question({ question, vote, bookmarked, yourAnswer }) {
 					<QuillNoSSRWrapper readOnly id='ques_container' modules={mods} value={question.question} theme="snow" className={style['question_container']} />
 				</div>
 				<div className='px-2 py-2'>
-					<span className='text-lg font-bold'>Comments: ({getNumString(question.comments.length)})</span> <span className='cursor-pointer text-sky-400 underline text-sm' onClick={() => { setshowComments(!showComments) }}> {showComments ? "Hide comments" : "Show comments"}</span>
-					<div className='px-2 flex gap-2 pb-2 items-center'>
-						<Input placeholder='Comment...' size='sm' /><span className='cursor-pointer text-sky-400 hover:underline text-sm' onClick={() => { }}> Reply</span>
-					</div>
-					{
-						question.comments.map((com,idx)=>{
+					<span className='text-lg font-bold pl-4 md:pl-8'>Comments: ({getNumString(commentList.length)})</span> <span className='cursor-pointer text-sky-400 underline text-sm' onClick={() => { setshowComments(!showComments) }}> {showComments ? "Hide comments" : "Show comments"}</span>
 
-						})
+					{
+						showComments ? commentList.length ?
+							commentList.map((id, idx) => {
+								return <Comment key={idx} id={id} />
+							})
+							:
+							<div className='text-sm pl-4 md:pl-8 pb-2'>No Commnets ...</div>
+							:
+							null
 					}
+					<div className='pr-2 flex gap-2 pb-2 pl-4 md:pl-8 items-center'>
+						<Textarea maxLength={500} value={comment} minHeight={'50px'} resize={'none'} variant={'filled'} placeholder='Add a comment' size='sm' onChange={(e => { setComment(e.target.value) })} /><span className='cursor-pointer text-sky-400 hover:underline text-sm' onClick={handleCommentPost}> Post</span>
+					</div>
 				</div>
 			</div>
+			<div className='mt-8 container mx-auto'>
+				{
+					question.answers.length ? <div className='text-lg font-bold px-2'>ANSWERS:</div> : null
+				}
+				{
+					question.answers.map((aid, idx) => {
+						return <Answer key={idx} id={aid} session={session} />
+					})
+				}
+			</div>
 
-			<div className='mt-8'>
+			<div className='mt-8 container mx-auto pb-8'>
 				<div className='text-lg font-bold px-2'>YOUR ANSWER:</div>
 				{
-					yourAnswer ?
-						<QuillNoSSRWrapper readOnly id='ques_container' modules={mods} value={yourAnswer.answer} theme="snow" className={style['question_container']} />
+					yourAnswerID ?
+						<Answer id={yourAnswerID} session={session} />
 						:
 
 						<div>
@@ -260,8 +488,9 @@ export default function Question({ question, vote, bookmarked, yourAnswer }) {
 }
 
 export async function getServerSideProps(context) {
-	const { params } = context
+	const { params, query } = context
 	const { id } = params
+	const { aid } = query
 	const session: any = await getSession(context)
 	if (!session) {
 		return {
@@ -319,7 +548,6 @@ export async function getServerSideProps(context) {
 	try {
 		yourAnswer = await answers.findOne({ questionID: id, userID: session.user.id })
 		answerID = yourAnswer._id
-		yourAnswer = JSON.stringify(yourAnswer)
 	} catch (error) {
 		yourAnswer = null
 	}
@@ -327,7 +555,7 @@ export async function getServerSideProps(context) {
 		theQuestion.answers.remove(answerID)
 	}
 	return {
-		props: { question: JSON.stringify(theQuestion), vote: voted, bookmarked, yourAnswer },
+		props: { scroll: aid || null, question: JSON.stringify(theQuestion), vote: voted, bookmarked, yourAnswerID: JSON.stringify(answerID) },
 	}
 }
 

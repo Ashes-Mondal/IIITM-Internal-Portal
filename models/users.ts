@@ -5,27 +5,32 @@ interface UserInfo {
 	name: string;
 	email: string;
 	headline: string;
-	linkedin:string;
+	linkedin: string;
 	image: string;
 	emailVerified: any;
-	starredQuestions:[Types.ObjectId]
+	starredQuestions: [Types.ObjectId]
+	starredAnswers: [Types.ObjectId]
+
 }
 
 // 2. Create a Schema corresponding to the document interface.
 const schema = new Schema<UserInfo>(
 	{
-		name: { type: String,default:function(){
-			return this.email.split('@')[0] || null
-		}},
+		name: {
+			type: String, default: function () {
+				return this.email.split('@')[0] || null
+			}
+		},
 		email: { type: String, required: true },
-		headline: { type: String, default:"Hi i am a new user" },
-		linkedin: { type: String},
-		image: { type: String},
+		headline: { type: String, default: "Hi i am a new user" },
+		linkedin: { type: String },
+		image: { type: String },
 		emailVerified: { type: Schema.Types.Date },
-		starredQuestions:[{type:Schema.Types.ObjectId}]
-	}
+		starredQuestions: [{ type: Schema.Types.ObjectId }],
+		starredAnswers: [{ type: Schema.Types.ObjectId }],
+	}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
 
 // 3. Create a Model.
-export {schema as schema}
+export { schema as schema }
 export default models.User || model<UserInfo>('User', schema);

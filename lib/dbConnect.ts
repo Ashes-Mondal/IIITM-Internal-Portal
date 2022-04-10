@@ -2,14 +2,21 @@ import mongoose from 'mongoose'
 import {schema as userSchema} from '../models/users';
 import {schema as questionSchema} from '../models/questions';
 import {schema as tagSchema} from '../models/tags';
+import {schema as ComSchema} from '../models/comments';
+import {schema as AnsSchema} from '../models/answers';
+
+
 
 
 const allModels = [
 	{name:"User",schema:userSchema},
 	{name:"Questions",schema:questionSchema},
 	{name:"Tags",schema:tagSchema},
+	{name:"Comments",schema:ComSchema},
+	{name:"Answers",schema:AnsSchema},
 
 ]
+
 const MONGODB_URI = process.env.MONGODB_URI
 // console.log(MONGODB_URI)
 

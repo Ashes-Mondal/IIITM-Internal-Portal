@@ -91,7 +91,7 @@ export function Editor() {
 	const handleSubmit = async () => {
 		if (content.length < 1 || title.length < 1) return
 		try {
-			const res = await axios.post('/api/uploads/askQuestion', { content, title, tags });
+			const res = await axios.post('/api/post/askQuestion', { content, title, tags });
 			if (!res.data.error) {
 				router.push('/')
 				return

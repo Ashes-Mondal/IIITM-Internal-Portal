@@ -1,10 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSession } from "next-auth/react"
-import dbConnect from '../../../lib/dbConnect'
-import answers from '../../../models/answers'
+import dbConnect from '../../../../lib/dbConnect'
+import comments from '../../../../models/comments'
+import questions from '../../../../models/questions'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-	if (req.method != "GET") {
+	if (req.method != "POST") {
 		res.status(404).json({ data: null, error: 'NOT_FOUND' })
 	}
 	const session = await getSession({ req });
@@ -17,11 +18,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	//*Client is signedIn
 	try {
 		await dbConnect()
-		const resp = await answers.find({ userID: id }).populate("questionID");
-		let ques = resp.map(q => {
-			return {id:q.questionID._id,title:q.questionID.questionTitle,aid:q._id}
-		})
-		res.status(200).json({ data: ques, error: null })
+		const doc = await comments.create({comment:req.body.comment,userID:id,})
+		doc.save()
+		await questions.findByIdAndUpdate(req.body.qid,{ $addToSet:{comments:doc._id} },{new:true}).populate("userID");
+		res.status(200).json({ data: doc._id, error: null })
 	} catch (error) {
 		console.log(error)
 		res.status(500).json({ data: null, error: "INTERNAL_SERVER_ERROR" })

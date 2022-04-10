@@ -19,8 +19,8 @@ const schema = new Schema<Trades>(
 		productDescription: { type: String, required: true },
 		imageURls:[{type: String}],
 		open: { type: Boolean, required: true },
-		date:{ type: Schema.Types.Date, default:Date.now() },
-	}
+		date:{ type: Schema.Types.Date, default:Date.now },
+	},{ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
 
 // 3. Create a Model.

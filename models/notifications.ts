@@ -15,8 +15,8 @@ const schema = new Schema<Notifications>(
 		userID:{ type: Schema.Types.ObjectId, ref: "User" ,required:true },
 		type: { type: String, required: true,default:"Normal" },
 		content: { type: String, required: true },
-		date:{ type: Schema.Types.Date, default:Date.now() },
-	}
+		date:{ type: Schema.Types.Date, default:Date.now },
+	},{ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
 
 // 3. Create a Model.

@@ -1,7 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
+import nextConnect from '../../../lib/nextConnect'
 import { getSession } from "next-auth/react"
 import dbConnect from '../../../lib/dbConnect'
-import answers from '../../../models/answers'
+import users from '../../../models/users';
+
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method != "GET") {
@@ -17,11 +19,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	//*Client is signedIn
 	try {
 		await dbConnect()
-		const resp = await answers.find({ userID: id }).populate("questionID");
-		let ques = resp.map(q => {
-			return {id:q.questionID._id,title:q.questionID.questionTitle,aid:q._id}
-		})
-		res.status(200).json({ data: ques, error: null })
+		let theUser = await users.findById(id);
+		res.status(200).json({ data: theUser, error: null })
 	} catch (error) {
 		console.log(error)
 		res.status(500).json({ data: null, error: "INTERNAL_SERVER_ERROR" })
