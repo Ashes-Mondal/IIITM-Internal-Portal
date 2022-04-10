@@ -33,7 +33,7 @@ handler.post(async (req: NextApiRequest, res: NextApiResponse) => {
 			return
 		}
 
-		console.log(req.body)
+		// console.log(req.body)
 		const tags = req.body.tags.map(tag => {
 			if (tag.__isNew__) {
 				newTags.push(tag.value);

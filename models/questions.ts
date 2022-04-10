@@ -10,6 +10,7 @@ interface Question {
 	tags: [String];
 	upvote: Types.ArraySubdocument;
 	downvote: Types.ArraySubdocument;
+	comments: Types.ArraySubdocument;
 	views: Number;
 	date: any
 }
@@ -26,6 +27,7 @@ const schema = new Schema<Question>(
 		tags: [{ type: String }],
 		upvote: [{ type: Schema.Types.ObjectId, ref: "User"}],
 		downvote:[{ type: Schema.Types.ObjectId, ref: "User"}],
+		comments:[{ type: Schema.Types.ObjectId, ref: "Comments"}],
 		views: { type: Number, default: 0 },
 
 		date: { type: Schema.Types.Date, default: Date.now() },

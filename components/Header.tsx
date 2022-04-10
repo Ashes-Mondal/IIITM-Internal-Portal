@@ -67,13 +67,6 @@ export default function Header() {
               md:justify-between 
               md:pt-0"
 				>
-					{/* <li>
-							<Link passHref href="/blogs">
-								<span onClick={() => set_open(false)} className="cursor-pointer md:p-4 py-2 block hover:text-purple-400">
-									Blogs
-								</span>
-							</Link>
-						</li> */}
 					<li>
 						<Link passHref href="/stackoverflow?tab=all">
 							<span onClick={() => set_open(false)} className="cursor-pointer md:p-4 py-2 block hover:text-purple-400 flex gap-0.5">
@@ -82,14 +75,14 @@ export default function Header() {
 							</span>
 						</Link>
 					</li>
-					<li>
+					{/* <li>
 						<Link passHref href="/report">
 							<span onClick={() => set_open(false)} className="cursor-pointer md:p-4 py-2 block hover:text-purple-400 flex gap-0.5">
 								<Image src={complaint} alt="" width={24} height={24} />
 								Report
 							</span>
 						</Link>
-					</li>
+					</li> */}
 					<li>
 						<Link passHref href="/trade">
 							<span onClick={() => set_open(false)} className="cursor-pointer md:p-4 py-2 block hover:text-purple-400 flex gap-0.5">

@@ -113,6 +113,8 @@ export async function getServerSideProps(context) {
 	}
 	const csrfToken = await getCsrfToken(context)
 	const providers = await getProviders()
+
+	
 	// console.log(csrfToken,providers)
 	return {
 		props: { csrfToken, providers, session: session, mailSent: mailSent != null, error: error || null },

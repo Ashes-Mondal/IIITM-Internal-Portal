@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useSession } from 'next-auth/react';
+import { getSession, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -20,22 +20,10 @@ import Head from 'next/head';
 import hljs from 'highlight.js'
 import { RWebShare } from "react-web-share";
 import { Button } from '@chakra-ui/react';
-
-
-
-/**
- * answers: []
-date: "Sun Apr 03 2022 09:34:06 GMT+0530 (India Standard Time)"
-downvote: 0
-question: "<p>Here is a piece of my code:</p><pre class=\"ql-syntax\" spellcheck=\"false\">def main():\n    num = 0\n    try:\n        raise Exception('This is the error message.')\n    except Exception:\n        num += 1\n        return num\n    finally:\n        num += 1\n\na = main()\nprint(a)\n</pre><p>The returning value is 1 instead of 2, this does not make a lot of sense for me. I thought it would return 2 since finally should execute before returning the value. Can someone help me to understand this?</p>"
-questionTitle: "Python confusion with return value in try-except-finally"
-tags: ['python3']
-upvote: 0
-userID: "62491ca3f023eaa03db41185"
-views: 0
-__v: 0
-_id: "62492234f023eaa03db4130e"
- */
+import { type } from 'os';
+import users from '../../../models/users';
+import answers from '../../../models/answers';
+import { Input } from '@chakra-ui/react'
 
 const QuillNoSSRWrapper = dynamic(import('react-quill'), {
 	ssr: false,
@@ -97,24 +85,67 @@ function getFormattedDate(dat) {
 	return str;
 }
 
-export default function Question({ question, vote }) {
+const getNumString = (num) => {
+	const k = Math.floor(num / 1000)
+	const m = Math.floor(num / 1000000)
+	if (m >= 1) return m.toString() + "M";
+	if (k >= 1) return k.toString() + "K";
+	return num
+}
 
-	const { data: session, status } = useSession()
+export default function Question({ question, vote, bookmarked, yourAnswer }) {
+	question = JSON.parse(question)
+	yourAnswer = JSON.parse(yourAnswer)
+	console.log(question, yourAnswer)
+	const { data, status } = useSession()
+	const session: any = data
 	const router = useRouter()
 
 	const [voted, setVote] = useState(vote)
-	const [bookMarked, setBookmarked] = useState(false)
+	const [votes, setVotes] = useState(getNumString(question.upvote.length + question.downvote.length))
+
+	const [bookMarked, setBookmarked] = useState(bookmarked)
 	const [answer, setAnswer] = useState('')
 	const [isLoading, setisLoading] = useState(false)
+	const [showComments, setshowComments] = useState(false)
 
+
+	console.log(question)
 
 	const handleVote = (num) => {
-		setVote(num);
+		const data = {
+			prevVal: voted,
+			newVal: num,
+			qid: question._id
+		}
+		axios.put('/api/update/vote', data).then(resp => { setVote(num); setVotes(getNumString(vote + (num !== 0))) }).catch((e) => { alert('Failed to vote!') })
 	}
 
 	const handleBookMark = (status) => {
-		setBookmarked(status);
+		const data = {
+			status,
+			qid: question._id
+		}
+		axios.put('/api/update/bookmark', data).then(resp => { setBookmarked(status); }).catch((e) => { alert('Failed to bookmark!') })
 	}
+
+	const handleSubmit = async () => {
+		if (answer.length < 1) return
+		try {
+			const res = await axios.post('/api/update/answer-question', { answer, qid: question._id });
+			if (!res.data.error) {
+				router.push('/')
+				return
+			} else {
+				console.error(res.data.error)
+				alert(res.data.error)
+			}
+		} catch (error) {
+			console.error(error)
+			alert(error)
+		}
+	}
+
 	const askedDate = getFormattedDate(question.date)
 	const siteURL = window.location.href
 	const checkDisability = () => {
@@ -127,17 +158,17 @@ export default function Question({ question, vote }) {
 			<Head>
 				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/monokai-sublime.min.css" />
 			</Head>
-			<div className='container mx-auto border-l border-r border-slate-300'>
+			<div className='container mx-auto  border border-slate-300'>
 				<div className='pt-4 pb-2 border-b border-b-slate-300 px-2'>
 					<div className='text-2xl font-bold'>
 						{question.questionTitle}
 					</div>
-					<div className='flex justify-between items-center px-5 pt-4'>
+					<div className='flex justify-between items-center md:px-5 pt-4'>
 						<div>
 							Asked: <span className='font-bold text-sm'>{askedDate}</span>
 						</div>
 						<div>
-							Views: <span className='font-bold text-sm'>{question.views}</span>
+							Views: <span className='font-bold text-sm'>{getNumString(question.views)}</span>
 						</div>
 						<RWebShare
 							data={{
@@ -154,7 +185,7 @@ export default function Question({ question, vote }) {
 					</div>
 				</div>
 				<div className='flex'>
-					<div className='py-16 flex flex-col items-center gap-2 w-32'>
+					<div className='py-16 flex flex-col items-center gap-2 w-64 md:w-40'>
 						<div>
 							{
 								voted === 1 ? <BsFillArrowUpCircleFill size={25} className='cursor-pointer' onClick={() => { handleVote(0) }} />
@@ -162,7 +193,7 @@ export default function Question({ question, vote }) {
 									<BsArrowUpCircle size={25} className='cursor-pointer' onClick={() => { handleVote(1) }} />
 							}
 						</div>
-						{question.upvote || 0 + question.downvote || 0}
+						{votes}
 						<div>
 							{
 								voted === -1 ? <BsFillArrowDownCircleFill size={25} className='cursor-pointer' onClick={() => { handleVote(0) }} />
@@ -181,28 +212,49 @@ export default function Question({ question, vote }) {
 					</div>
 					<QuillNoSSRWrapper readOnly id='ques_container' modules={mods} value={question.question} theme="snow" className={style['question_container']} />
 				</div>
+				<div className='px-2 py-2'>
+					<span className='text-lg font-bold'>Comments: ({getNumString(question.comments.length)})</span> <span className='cursor-pointer text-sky-400 underline text-sm' onClick={() => { setshowComments(!showComments) }}> {showComments ? "Hide comments" : "Show comments"}</span>
+					<div className='px-2 flex gap-2 pb-2 items-center'>
+						<Input placeholder='Comment...' size='sm' /><span className='cursor-pointer text-sky-400 hover:underline text-sm' onClick={() => { }}> Reply</span>
+					</div>
+					{
+						question.comments.map((com,idx)=>{
+
+						})
+					}
+				</div>
 			</div>
 
 			<div className='mt-8'>
-				<div className='text-lg font-bold'>YOUR ANSWER:</div>
-				<QuillNoSSRWrapper modules={modules} formats={formats} id='quill_container' value={answer} onChange={(val) => setAnswer(val)} theme="snow" className={style['question_container']} />
+				<div className='text-lg font-bold px-2'>YOUR ANSWER:</div>
+				{
+					yourAnswer ?
+						<QuillNoSSRWrapper readOnly id='ques_container' modules={mods} value={yourAnswer.answer} theme="snow" className={style['question_container']} />
+						:
 
-				<Button
-					onClick={async (e) => {
-						e.preventDefault();
-						setisLoading(true)
-						await handleSubmit()
-						setisLoading(false)
-					}}
-					className='!w-full px-4 mt-2 mb-8'
-					isLoading={isLoading}
-					loadingText='Submitting'
-					colorScheme='teal'
-					variant='solid'
-					disabled={checkDisability()}
-				>
-					Submit
-				</Button></div>
+						<div>
+							<QuillNoSSRWrapper modules={modules} formats={formats} id='quill_container' value={answer} onChange={(val) => setAnswer(val)} theme="snow" className={style['question_container']} />
+
+							<Button
+								onClick={async (e) => {
+									e.preventDefault();
+									setisLoading(true)
+									await handleSubmit()
+									setisLoading(false)
+								}}
+								className='!w-full px-4 mt-2 mb-8'
+								isLoading={isLoading}
+								loadingText='Submitting'
+								colorScheme='teal'
+								variant='solid'
+								disabled={checkDisability()}
+							>
+								Submit
+							</Button>
+						</div>
+				}
+			</div>
+
 		</>
 	)
 }
@@ -210,11 +262,26 @@ export default function Question({ question, vote }) {
 export async function getServerSideProps(context) {
 	const { params } = context
 	const { id } = params
+	const session: any = await getSession(context)
+	if (!session) {
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/",
+			},
+			props: {},
+		}
+	}
 
 	await dbConnect()
 	let theQuestion
+	let voted = 0
 	try {
-		theQuestion = await questions.findById(id)
+		theQuestion = await questions.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true })
+		if (theQuestion.upvote.includes(session.user.id)) {
+			voted = 1
+		}
+		else if (theQuestion.downvote.includes(session.user.id)) voted = -1
 	} catch (error) {
 		return {
 			redirect: {
@@ -234,21 +301,33 @@ export async function getServerSideProps(context) {
 			props: {},
 		}
 	}
-	// console.log(CurrUser)
-	let qid: string = theQuestion?._id?.toString();
-	let uid: string = theQuestion?.userID?.toString();
-
-	let obj = {
-		_id: null,
-		userID: null,
-		date: null,
-		...theQuestion['_doc']
+	let bookmarked = false;
+	try {
+		const { starredQuestions } = await users.findById(session.user.id, { starredQuestions: true, _id: false })
+		if (starredQuestions.includes(id)) bookmarked = true;
+	} catch (error) {
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/",
+			},
+			props: {},
+		}
 	}
-	obj._id = qid;
-	obj.userID = uid;
-	obj.date = theQuestion.date.toString();
+	let yourAnswer = null
+	let answerID = null
+	try {
+		yourAnswer = await answers.findOne({ questionID: id, userID: session.user.id })
+		answerID = yourAnswer._id
+		yourAnswer = JSON.stringify(yourAnswer)
+	} catch (error) {
+		yourAnswer = null
+	}
+	if (answerID) {
+		theQuestion.answers.remove(answerID)
+	}
 	return {
-		props: { question: obj, vote: 0 },
+		props: { question: JSON.stringify(theQuestion), vote: voted, bookmarked, yourAnswer },
 	}
 }
 

@@ -15,6 +15,7 @@ import questions from '../../models/questions';
 
 
 export default function Stackoverflow({ questions, tab }) {
+	questions = JSON.parse(questions)
 	const { data: session, status } = useSession()
 	const router = useRouter()
 
@@ -102,15 +103,7 @@ export async function getServerSideProps(context) {
 	try {
 		await dbConnect()
 		const all_questions = await questions.find({}).populate("userID");
-
-		let ques = all_questions.map(q => {
-			let obj = { _id: null, date: null, userID: null, ...q['_doc'] }
-			obj._id = q._id.toString();
-			obj.date = q.date.toString();
-			obj.userID = { _id: q.userID._id.toString(), email: q.userID.email, image: q.userID.image, name: q.userID.name }
-			return obj;
-		})
-		ques = sortQuestions(ques, tab)
+		let ques = JSON.stringify(sortQuestions(all_questions, tab)) 
 		return {
 			props: { questions: ques, tab },
 		}

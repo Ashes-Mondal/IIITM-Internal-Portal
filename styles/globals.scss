@@ -39,12 +39,21 @@ a {
   display: none;
 }
 
+#ques_container {
+  .ql-editor {
+    min-height: 4in;
+    padding: 12px 1rem;
+    font-size: 18px;
+  }
+}
+
 #quill_container {
   .ql-editor {
-    min-height: 5in;
+    min-height: 4in;
     padding: 12px;
     font-size: 18px;
   }
+
   padding-bottom: 1rem;
 }
 

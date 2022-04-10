@@ -9,7 +9,6 @@ interface Answers {
 	comments:Types.ArraySubdocument;
 	upvote:Types.ArraySubdocument;
 	downvote:Types.ArraySubdocument;
-	views:Number;
 	date:any
 }
 
@@ -24,7 +23,6 @@ const schema = new Schema<Answers>(
 
 		upvote: [{ type: Schema.Types.ObjectId, ref: "User"}],
 		downvote:[{ type: Schema.Types.ObjectId, ref: "User"}],
-		views: { type: Number, default:0 },
 		
 		date:{ type: Schema.Types.Date, default:Date.now() },
 	}
