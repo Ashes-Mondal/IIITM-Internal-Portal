@@ -58,13 +58,15 @@ a {
 }
 
 .quill_container {
-  .ql-toolbar.ql-snow{
-    display: none;
-  }
   .ql-editor {
     min-height: 4in;
     padding: 12px;
     font-size: 14px;
+  }
+}
+.quill_no_toolbar{
+  .ql-toolbar.ql-snow{
+    display: none;
   }
 }
 

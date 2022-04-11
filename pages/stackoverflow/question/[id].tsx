@@ -171,11 +171,8 @@ const Answer = ({ id, session }) => {
 	return (
 		<div id={id} className='container mx-auto  border border-slate-300'>
 			<div className='pt-4 pb-2 border-b border-b-slate-300 px-2'>
-				<div className='flex justify-between items-center md:px-5 pt-4'>
-					<div>
-						Answered: <span className='font-bold text-sm'>{answeredDate}</span>
-					</div>
-					<div>
+				<div className='flex justify-end items-center md:px-5 pt-4'>
+					<div className='flex flex-wrap gap-2'>
 						<Link passHref href={`/profile/${details?.userID._id}`}>
 							<span className='cursor-pointer text-sky-600 hover:text-blue-400 flex gap-1'>
 								{details?.userID.image == null ? <Image src={avatar} alt="" width={14} height={12} />
@@ -184,6 +181,9 @@ const Answer = ({ id, session }) => {
 								{details?.userID.name}
 							</span>
 						</Link>
+						<span>
+							<span className='font-bold text-sm'>{answeredDate}</span>
+						</span>
 					</div>
 				</div>
 			</div>
@@ -213,8 +213,9 @@ const Answer = ({ id, session }) => {
 						}
 					</div>
 				</div>
-				<QuillNoSSRWrapper readOnly modules={mods} value={details?.answer} theme="snow" className='quill_container' />
+				<QuillNoSSRWrapper readOnly modules={mods} value={details?.answer} theme="snow" className={`quill_container quill_no_toolbar`} />
 			</div>
+
 			<div className='px-2 py-2'>
 				<span className='text-lg font-bold pl-4 md:pl-8'>Comments: ({getNumString(commentList.length)})</span> <span className='cursor-pointer text-sky-400 underline text-sm' onClick={() => { setshowComments(!showComments) }}> {showComments ? "Hide comments" : "Show comments"}</span>
 
@@ -282,7 +283,7 @@ const Comment = ({ id }) => {
 	)
 }
 
-export default function Question({ question, vote, bookmarked, yourAnswerID, scroll }) {
+export default function Question({ question, vote, bookmarked, yourAnswerID, scroll,yourAnswer }) {
 	question = JSON.parse(question)
 	yourAnswerID = JSON.parse(yourAnswerID)
 
@@ -295,13 +296,15 @@ export default function Question({ question, vote, bookmarked, yourAnswerID, scr
 	const [votes, setVotes] = useState(getNumString(question.upvote.length + question.downvote.length))
 
 	const [bookMarked, setBookmarked] = useState(bookmarked)
-	const [answer, setAnswer] = useState('')
+	const [answer, setAnswer] = useState(yourAnswer || '')
 	const [comment, setComment] = useState('')
 	const [commentList, setCommentList] = useState(question.comments)
 
 
 	const [isLoading, setisLoading] = useState(false)
 	const [showComments, setshowComments] = useState(false)
+	const [openAnsEdit, setOpenAnsEdit] = useState(false)
+
 
 	const handleVote = (num) => {
 		const data = {
@@ -341,6 +344,23 @@ export default function Question({ question, vote, bookmarked, yourAnswerID, scr
 		}
 	}
 
+	const handleEditSubmit = async () => {
+		if (answer.length < 1) return
+		try {
+			const res = await axios.put('/api/update/answer', { answer, aid: yourAnswerID });
+			if (!res.data.error) {
+				router.push('/')
+				return
+			} else {
+				console.error(res.data.error)
+				alert(res.data.error)
+			}
+		} catch (error) {
+			console.error(error)
+			alert(error)
+		}
+	}
+
 	const askedDate = getFormattedDate(question.date)
 	const siteURL = window.location.href
 	const checkDisability = () => {
@@ -361,7 +381,7 @@ export default function Question({ question, vote, bookmarked, yourAnswerID, scr
 
 	useEffect(() => {
 		if (scroll) {
-			const Element =  document.getElementById(scroll)
+			const Element = document.getElementById(scroll)
 			Element.scrollIntoView({ behavior: 'smooth' })
 		}
 	}, [])
@@ -455,9 +475,37 @@ export default function Question({ question, vote, bookmarked, yourAnswerID, scr
 
 			<div className='mt-8 container mx-auto pb-8'>
 				<div className='text-lg font-bold px-2'>YOUR ANSWER:</div>
+				{yourAnswerID ?
+					<div className='flex justify-end cursor-pointer text-sky-400 underline text-md' onClick={() => { setOpenAnsEdit(!openAnsEdit) }}> {openAnsEdit ? 'Revert back' : 'Edit'}</div>
+					: null
+				}
 				{
 					yourAnswerID ?
-						<Answer id={yourAnswerID} session={session} />
+						openAnsEdit ?
+							(
+								<div>
+									<QuillNoSSRWrapper modules={modules} formats={formats} id='quill_container' value={answer} onChange={(val) => setAnswer(val)} theme="snow" className={style['question_container']} />
+
+									<Button
+										onClick={async (e) => {
+											e.preventDefault();
+											setisLoading(true)
+											await handleEditSubmit()
+											setisLoading(false)
+										}}
+										className='!w-full px-4 mt-2 mb-8'
+										isLoading={isLoading}
+										loadingText='Submitting'
+										colorScheme='teal'
+										variant='solid'
+										disabled={checkDisability()}
+									>
+										Update
+									</Button>
+								</div>
+							)
+							: <Answer id={yourAnswerID} session={session} />
+
 						:
 
 						<div>
@@ -548,6 +596,7 @@ export async function getServerSideProps(context) {
 	try {
 		yourAnswer = await answers.findOne({ questionID: id, userID: session.user.id })
 		answerID = yourAnswer._id
+		yourAnswer=yourAnswer.answer
 	} catch (error) {
 		yourAnswer = null
 	}
@@ -555,7 +604,7 @@ export async function getServerSideProps(context) {
 		theQuestion.answers.remove(answerID)
 	}
 	return {
-		props: { scroll: aid || null, question: JSON.stringify(theQuestion), vote: voted, bookmarked, yourAnswerID: JSON.stringify(answerID) },
+		props: { scroll: aid || null, question: JSON.stringify(theQuestion), vote: voted, bookmarked, yourAnswerID: JSON.stringify(answerID) ,yourAnswer:yourAnswer?JSON.stringify(yourAnswer):null},
 	}
 }
 
