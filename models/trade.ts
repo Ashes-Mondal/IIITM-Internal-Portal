@@ -4,10 +4,11 @@ import { Schema, model, Types,models} from 'mongoose';
 // 1. Create an interface representing a document in MongoDB.
 interface Trades {
 	userID: Types.ObjectId;
-	productTitle:String;
+	productName:String;
 	productDescription: String;
 	imageURls: [String];
 	open: Boolean;
+	cost: Boolean;
 	date:any
 }
 
@@ -15,10 +16,11 @@ interface Trades {
 const schema = new Schema<Trades>(
 	{
 		userID:{ type: Schema.Types.ObjectId, ref: "User" ,required:true },
-		productTitle: { type: String, required: true },
+		productName: { type: String, required: true },
 		productDescription: { type: String, required: true },
 		imageURls:[{type: String}],
 		open: { type: Boolean, required: true },
+		cost: { type: Boolean, required: true },
 		date:{ type: Schema.Types.Date, default:Date.now },
 	},{ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
