@@ -18,7 +18,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
 		await dbConnect()
 		const {id:cid} = req.query
-		console.log(cid)
+		// console.log(cid)
 		let comment = await comments.findById(cid).populate('userID');
 
 		res.status(200).json({ data: comment, error: null })

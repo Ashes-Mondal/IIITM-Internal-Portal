@@ -27,7 +27,7 @@ handler.post(async (req: NextApiRequest, res: NextApiResponse) => {
 	let newTags = []
 	try {
 		const session: any = await getSession({ req });
-		console.log(session);
+		// console.log(session);
 		if (!session) {
 			res.status(401).json({ data: null, error: 'UNAUTHORIZED' })
 			return
@@ -50,7 +50,7 @@ handler.post(async (req: NextApiRequest, res: NextApiResponse) => {
 	//after sending response insert tags
 	if (newTags.length) {
 		handleNewTags(newTags).then(resp => {
-			console.log(resp);
+			// console.log(resp);
 		}).catch(error => {
 			console.log(error);
 		})

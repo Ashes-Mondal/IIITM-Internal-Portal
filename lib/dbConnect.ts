@@ -4,6 +4,8 @@ import {schema as questionSchema} from '../models/questions';
 import {schema as tagSchema} from '../models/tags';
 import {schema as ComSchema} from '../models/comments';
 import {schema as AnsSchema} from '../models/answers';
+import {schema as TradeSchema} from '../models/trade';
+
 
 
 
@@ -14,7 +16,7 @@ const allModels = [
 	{name:"Tags",schema:tagSchema},
 	{name:"Comments",schema:ComSchema},
 	{name:"Answers",schema:AnsSchema},
-
+	{name:"Trades",schema:TradeSchema},
 ]
 
 const MONGODB_URI = process.env.MONGODB_URI

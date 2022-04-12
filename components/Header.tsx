@@ -84,7 +84,7 @@ export default function Header() {
 						</Link>
 					</li> */}
 					<li>
-						<Link passHref href="/trade">
+						<Link passHref href="/trade?tab=all">
 							<span onClick={() => set_open(false)} className="cursor-pointer md:p-4 py-2 block hover:text-purple-400 flex gap-0.5">
 								<Image src={trade} alt="" width={24} height={24} />
 								Sell | Buy

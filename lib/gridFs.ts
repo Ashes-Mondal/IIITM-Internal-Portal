@@ -17,6 +17,11 @@ export const singleFileUpload = async (req, res, next) => {
 	await dbConnect()
 	singleUpload(req, res, (err) => {
 		const file = req.file
+		if(!file)
+		{
+			next()
+			return
+		}
 		const ext = path.extname(file.originalname)
 		if (ext != '.png' && ext != '.jpg' && ext != '.jpeg') {
 			res.status(400).json({ data: null, error: "Files limited to png,jpg,svg ONLY!" });

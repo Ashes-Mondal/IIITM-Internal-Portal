@@ -18,7 +18,7 @@ handler.put(singleFileUpload, async (req:NextApiRequest & {file:any}, res: NextA
 	//*Client is signedIn
 	try {
 		let prevFileID = null
-		if(req.body.link.includes(`${process.env.NEXTAUTH_URL}/api/profile-avatar`))
+		if(req.body.link.includes(`${process.env.NEXTAUTH_URL}/api/image`))
 		{
 			const url = new URL(req.body.link);
 			const urlParams = new URLSearchParams(url.search);
@@ -29,7 +29,7 @@ handler.put(singleFileUpload, async (req:NextApiRequest & {file:any}, res: NextA
 			await deleteFile(prevFileID)
 		}
 		const file = req.file
-		const url = `${process.env.NEXTAUTH_URL}/api/profile-avatar?id=${file.id}`
+		const url = `${process.env.NEXTAUTH_URL}/api/image?id=${file.id}`
 		await dbConnect()
 		const res = await users.findByIdAndUpdate(id, { image: url })
 	} catch (error) {
