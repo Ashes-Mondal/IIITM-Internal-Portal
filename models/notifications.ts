@@ -5,7 +5,8 @@ import { Schema, model, Types,models} from 'mongoose';
 interface Notifications {
 	userID: Types.ObjectId;
 	type:String;
-	content: String;
+	notification: String;
+	title: String;
 	date:any
 }
 
@@ -14,7 +15,9 @@ const schema = new Schema<Notifications>(
 	{
 		userID:{ type: Schema.Types.ObjectId, ref: "User" ,required:true },
 		type: { type: String, required: true,default:"Normal" },
-		content: { type: String, required: true },
+		notification: { type: String, required: true },
+		title: { type: String, required: true },
+
 		date:{ type: Schema.Types.Date, default:Date.now },
 	},{ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
