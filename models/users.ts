@@ -26,8 +26,8 @@ const schema = new Schema<UserInfo>(
 		linkedin: { type: String },
 		image: { type: String },
 		emailVerified: { type: Schema.Types.Date },
-		starredQuestions: [{ type: Schema.Types.ObjectId }],
-		starredAnswers: [{ type: Schema.Types.ObjectId }],
+		starredQuestions: [{ type: Schema.Types.ObjectId ,ref:'Questions'}],
+		starredAnswers: [{ type: Schema.Types.ObjectId ,ref:'Answers'}],
 	}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
 

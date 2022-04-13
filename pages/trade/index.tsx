@@ -20,7 +20,7 @@ import dbConnect from '../../lib/dbConnect';
 import trade from '../../models/trade';
 import no_data from '../../images/no-data-found.png'
 import { BsSearch } from "react-icons/bs";
-import { AiOutlineCloseCircle } from "react-icons/ai";
+import { FaRegHandshake } from "react-icons/fa";
 
 
 
@@ -54,7 +54,7 @@ const Card = ({ details, session }) => {
 							<div className='flex-1'>
 								<img src={product?.image} alt="Sample photo" />
 								{
-									session.user.id === product.userID._id ?
+									product?.open && session.user.id === product?.userID._id ?
 										<div className='flex justify-end pt-2 text-sm'>
 											<Button colorScheme='red' mr={1} type='submit' className='text-sm' onClick={handleCloseDeal} >
 												Close Deal
@@ -63,6 +63,13 @@ const Card = ({ details, session }) => {
 												Update
 											</Button>
 										</div> : null
+								}
+								{
+									product?.open?null:
+									<div className='flex justify-end gap-1 items-center p-1'>
+										<FaRegHandshake size={30} color='purple'/>
+										<span className='text-md font-semibold underline'>Deal Closed</span>
+									</div>
 								}
 
 								<div className={style['text']}>
