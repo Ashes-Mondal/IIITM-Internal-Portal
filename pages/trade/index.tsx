@@ -38,7 +38,7 @@ const Card = ({ details, session }) => {
 	}, [details])
 	return (
 		<>
-			<article>
+			<article className='bg-white'>
 				{loading ?
 					(
 						<>
@@ -49,10 +49,14 @@ const Card = ({ details, session }) => {
 					)
 					:
 					(
-						<div className='flex justify-around flex-col h-full'>
+						<div className='flex justify-around flex-col h-full '>
 							<TheModal isOpen={edit} setOpen={setEdit} session={session} pid={product?._id} />
-							<div className='flex-1'>
+							<div className='flex flex-1 justify-center items-center bg-slate-200'>
 								<img src={product?.image} alt="Sample photo" />
+							</div>
+
+
+							<div>
 								{
 									product?.open && session.user.id === product?.userID._id ?
 										<div className='flex justify-end pt-2 text-sm'>
@@ -65,13 +69,12 @@ const Card = ({ details, session }) => {
 										</div> : null
 								}
 								{
-									product?.open?null:
-									<div className='flex justify-end gap-1 items-center p-1'>
-										<FaRegHandshake size={30} color='purple'/>
-										<span className='text-md font-semibold underline'>Deal Closed</span>
-									</div>
+									product?.open ? null :
+										<div className='flex justify-end gap-1 items-center p-1'>
+											<FaRegHandshake size={30} color='purple' />
+											<span className='text-md font-semibold underline'>Deal Closed</span>
+										</div>
 								}
-
 								<div className={style['text']}>
 									<div className='font-semibold text-2xl'>{product?.productName}</div>
 									<p>
@@ -80,10 +83,6 @@ const Card = ({ details, session }) => {
 										}
 									</p>
 								</div>
-							</div>
-
-
-							<div>
 								<h6 className="text-sm font-bold text-gray-800 pl-4">Email: {product?.userID.email}</h6>
 								<h1 className="text-2xl font-bold text-gray-800 flex justify-end pr-8">₹ {product?.cost}</h1>
 								<div className='flex flex-wrap justify-end text-sm items-center pr-4'>
@@ -95,7 +94,7 @@ const Card = ({ details, session }) => {
 											{product?.userID.name}
 										</span>
 									</Link>
-									<span className="font-semibold">
+									<span className="font-semibold mb-4">
 										{new Date(product?.date).toLocaleString()}
 									</span>
 								</div>
@@ -286,9 +285,13 @@ export default function TradePage({ trades, tab }) {
 
 	const handleSearch = () => {
 		setDisplay(trades.filter(t => {
-			if (t.productName.toLowerCase().includes(search.toLowerCase()) || t.description.toLowerCase().includes(search.toLowerCase())) {
-				return true
+			let allWords = search.split(' ');
+			for (let i = 0; i < allWords.length; i++) {
+				if (t.productName.toLowerCase().includes(allWords[i].toLowerCase()) || t.description.toLowerCase().includes(allWords[i].toLowerCase())) {
+					return true
+				}
 			}
+
 			return false
 		}))
 	}
@@ -310,9 +313,9 @@ export default function TradePage({ trades, tab }) {
 		}
 	}, [costOpt])
 
-	useEffect(()=>{
+	useEffect(() => {
 		setDisplay(trades)
-	},[tab])
+	}, [tab])
 
 	return (
 		<>
@@ -395,8 +398,8 @@ export async function getServerSideProps(context) {
 		if (tab.toLowerCase() === 'all') {
 			trades = await trade.find({ open: true }).populate('userID')
 		}
-		else if(tab.toLowerCase() === 'your') {
-			trades = await trade.find({userID:session.user.id }).populate('userID')
+		else if (tab.toLowerCase() === 'your') {
+			trades = await trade.find({ userID: session.user.id }).populate('userID')
 		}
 		return {
 			props: { trades: JSON.stringify(trades), tab },

@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 html,
-
 body {
   padding: 0;
   margin: 0;
@@ -57,15 +56,20 @@ a {
   padding-bottom: 1rem;
 }
 
+.quill .quill_container .quill_no_toolbar {
+  flex:1,0,0;
+}
+
 .quill_container {
   .ql-editor {
-    min-height: 4in;
+    min-height: 3in;
     padding: 12px;
     font-size: 14px;
   }
 }
-.quill_no_toolbar{
-  .ql-toolbar.ql-snow{
+
+.quill_no_toolbar {
+  .ql-toolbar.ql-snow {
     display: none;
   }
 }

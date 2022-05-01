@@ -162,6 +162,18 @@ export default function Home({ notifications, emergencyNotifications }) {
     </div>
     <div className='pb-8'>
       <Collapse in={openEModal} animateOpacity className='pb-8'>
+        <div className='flex justify-center items-center flex-col'>
+          {
+
+            emergencies.length ? null :
+              (
+                <>
+                  <Image src={er} alt="" width={300} height={250} />
+                  <div className='font-semibold text-xl'> No Priority Notifications Yet</div>
+                </>
+              )
+          }
+        </div>
         {emergencies.map((notification, idx) => {
           if (idx % 2) {
             return (
@@ -236,7 +248,7 @@ export default function Home({ notifications, emergencyNotifications }) {
     </div>
 
 
-    <div className='flex justify-center items-center flex-col'>
+    {/* <div className='flex justify-center items-center flex-col'>
       {
         emergencies.length ? null : (
           <>
@@ -245,7 +257,7 @@ export default function Home({ notifications, emergencyNotifications }) {
           </>
         )
       }
-    </div>
+    </div> */}
 
 
     <div className='flex mt-8'>

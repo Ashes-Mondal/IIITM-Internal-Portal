@@ -213,7 +213,7 @@ const Answer = ({ id, session }) => {
 						}
 					</div>
 				</div>
-				<QuillNoSSRWrapper readOnly modules={mods} value={details?.answer} theme="snow" className={`quill_container quill_no_toolbar`} />
+				<QuillNoSSRWrapper readOnly modules={mods} value={details?.answer} theme="snow" className={`quill_container quill_no_toolbar w-full`} />
 			</div>
 
 			<div className='px-2 py-2'>
@@ -332,7 +332,7 @@ export default function Question({ question, vote, bookmarked, yourAnswerID, scr
 		try {
 			const res = await axios.post('/api/update/answer-question', { answer, qid: question._id });
 			if (!res.data.error) {
-				router.push('/')
+				router.reload()
 				return
 			} else {
 				console.error(res.data.error)
@@ -349,7 +349,7 @@ export default function Question({ question, vote, bookmarked, yourAnswerID, scr
 		try {
 			const res = await axios.put('/api/update/answer', { answer, aid: yourAnswerID });
 			if (!res.data.error) {
-				router.push('/')
+				router.reload()
 				return
 			} else {
 				console.error(res.data.error)
@@ -484,7 +484,7 @@ export default function Question({ question, vote, bookmarked, yourAnswerID, scr
 						openAnsEdit ?
 							(
 								<div>
-									<QuillNoSSRWrapper modules={modules} formats={formats} id='quill_container' value={answer} onChange={(val) => setAnswer(val)} theme="snow" className={style['question_container']} />
+									<QuillNoSSRWrapper modules={modules} formats={formats} id='quill_container' value={answer} onChange={(val) => setAnswer(val)} theme="snow" className={style['question_container'] } />
 
 									<Button
 										onClick={async (e) => {
