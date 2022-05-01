@@ -57,12 +57,27 @@ export default nextAuth(
 		secret: process.env.SECRET,
 		pages: {
 			signIn: `${process.env.NEXTAUTH_URL}`,
-			verifyRequest:`${process.env.NEXTAUTH_URL}?mailSent=true`,
-			error:`${process.env.NEXTAUTH_URL}`,
-			newUser:`${process.env.NEXTAUTH_URL}/api/redirect?page=profile`,
+			verifyRequest: `${process.env.NEXTAUTH_URL}?mailSent=true`,
+			error: `${process.env.NEXTAUTH_URL}`,
+			newUser: `${process.env.NEXTAUTH_URL}/api/redirect?page=profile`,
 		},
 		callbacks:
 		{
+			async signIn({ user, account, profile, email, credentials }) {
+				console.log(account, profile, email, credentials)
+				let userEmail = null
+				if (account.type === 'email') {
+					userEmail = account.providerAccountId
+				}
+				else
+				{
+					userEmail = profile.email
+				}
+				let domain = userEmail?.split('@')[1]
+				console.log(domain)
+				return domain === 'iiitm.ac.in'
+				// return true
+			},
 			async jwt({ token, account }) {
 				// Persist the OAuth access_token to the token right after signin
 				console.log("account", account, "token", token)
@@ -73,11 +88,13 @@ export default nextAuth(
 			},
 			async session({ session, token, user }) {
 				// Send properties to the client, like an access_token from a provider.
+				// console.log("session", session, "token", token,"user",user)
+
 				if (token && token.accessToken) {
 					session.accessToken = token.accessToken
 				}
 				const sessionUser = {
-					id:user.id,
+					id: user.id,
 					...session.user
 				}
 				session.user = sessionUser

@@ -3,7 +3,7 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import avatar from '../../images/avatar2.svg'
 import dbConnect from '../../lib/dbConnect';
@@ -23,6 +23,14 @@ export default function Profile({ CurrUser, qbookmarks, abookmarks }) {
 	const [headline, setHeadline] = useState(CurrUser?.headline)
 	const [linkedin, setLinkedin] = useState(CurrUser?.linkedin || null)
 	const [image, setImage] = useState(CurrUser?.image || null)
+
+	useEffect(()=>{
+		setName(CurrUser?.name || CurrUser?.email.split('@')[0])
+		setEmail(CurrUser?.email)
+		setHeadline(CurrUser?.headline)
+		setLinkedin(CurrUser?.linkedin || null)
+		setImage(CurrUser?.image || null)
+	},[CurrUser])
 
 	const handleSubmit = async () => {
 		if (name.length < 1) return
@@ -113,7 +121,7 @@ export default function Profile({ CurrUser, qbookmarks, abookmarks }) {
 
 				<div>
 					<label className="block text-gray-700 mt-4">Username</label>
-					<input disabled={session == null} value={name} onChange={e => { setName(e.target.value) }} type="text" placeholder="Enter name" className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none" autoFocus required />
+					<input disabled={CurrUser.email !== user?.email} value={name} onChange={e => { setName(e.target.value) }} type="text" placeholder="Enter name" className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none" autoFocus required />
 				</div>
 
 				{
@@ -121,7 +129,7 @@ export default function Profile({ CurrUser, qbookmarks, abookmarks }) {
 				}
 				<div>
 					<label className="block text-gray-700 mt-4">Headline</label>
-					<input disabled={session == null} value={headline} onChange={e => { setHeadline(e.target.value) }} type="text" placeholder="Hi i am a new user" className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none" required />
+					<input disabled={CurrUser.email !== user?.email} value={headline} onChange={e => { setHeadline(e.target.value) }} type="text" placeholder="Hi i am a new user" className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none" required />
 				</div>
 
 				{
@@ -129,7 +137,7 @@ export default function Profile({ CurrUser, qbookmarks, abookmarks }) {
 				}
 				<div>
 					<label className="block text-gray-700 mt-4">Linkedin Link</label>
-					<input disabled={session == null} value={linkedin} onChange={e => { setLinkedin(e.target.value) }} type="text" placeholder="Enter LinkedIn Link" className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none" />
+					<input disabled={CurrUser.email !== user?.email} value={linkedin} onChange={e => { setLinkedin(e.target.value) }} type="text" placeholder="Enter LinkedIn Link" className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none" />
 				</div>
 
 				<div>
@@ -148,8 +156,8 @@ export default function Profile({ CurrUser, qbookmarks, abookmarks }) {
 					(
 						<>
 							<div className="flex flex-wrap items-center justify-center text-3xl font-bold">
-								Questions Bookmark
-							</div>
+								{qbookmarks?.length ? 'Questions Bookmark' : ''}
+							</div> 
 							{
 								qbookmarks.map((q, idx) => {
 									return (
@@ -162,7 +170,7 @@ export default function Profile({ CurrUser, qbookmarks, abookmarks }) {
 								})
 							}
 							<div className="flex flex-wrap items-center justify-center text-3xl font-bold">
-								Answers Bookmark
+								{abookmarks?.length ? 'Answers Bookmark' : ''}
 							</div>
 							{
 								abookmarks.map((a, idx) => {

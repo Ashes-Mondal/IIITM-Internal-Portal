@@ -16,6 +16,7 @@ const errors: Record<string, string> = {
 	'EmailSignin': "Check your email address.",
 	'CredentialsSignin': "Sign in failed. Check the details you provided are correct.",
 	'SessionRequired': `Session expired, LogIn to continue.`,
+	'AccessDenied': "Access Denied, Please Login with institute email.",
 	'default': "Unable to sign in.",
 };
 //"https://i.imgur.com/81RTZEw.png"

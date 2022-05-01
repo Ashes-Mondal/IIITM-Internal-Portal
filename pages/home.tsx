@@ -111,7 +111,7 @@ const TheModal = ({ isOpen, setOpen, session }) => {
 }
 
 
-export default function Home({ notifications,emergencyNotifications }) {
+export default function Home({ notifications, emergencyNotifications }) {
   notifications = JSON.parse(notifications)
   emergencyNotifications = JSON.parse(emergencyNotifications)
 
@@ -120,6 +120,7 @@ export default function Home({ notifications,emergencyNotifications }) {
   const { isOpen, onToggle } = useDisclosure()
   const [emergencies, setEmergencies] = useState(emergencyNotifications || [])
   const [normal, setNormal] = useState(notifications || [])
+  const [openEModal, setOpenEModal] = useState(false);
 
 
   useEffect(() => {
@@ -137,7 +138,7 @@ export default function Home({ notifications,emergencyNotifications }) {
     });
 
     setTimeout(() => {
-        onToggle()
+      onToggle()
     }, 500);
 
     return () => {
@@ -151,80 +152,87 @@ export default function Home({ notifications,emergencyNotifications }) {
       <Button leftIcon={<MdNotificationAdd size={20} />} colorScheme='purple' variant='solid' onClick={() => setOpenModal(true)} >Notify</Button>
     </div>
 
-    <div className='pl-4 text-2xl font-semibold'>
+    <div className='pl-4 text-2xl font-semibold flex justify-between'>
       Emergencies ({emergencies.length})
+      <span className='cursor-pointer' onClick={() => { setOpenEModal(!openEModal) }}>
+        <span>
+          {openEModal ? <AiFillCaretDown /> : <AiOutlinePlus />}
+        </span>
+      </span>
     </div>
     <div className='pb-8'>
-      {emergencies.map((notification, idx) => {
-        if (idx % 2) {
-          return (
-            <>
-              <Box
-                p='40px'
-                color='#F7F5F2'
-                mt='4'
-                bg='#712B75'
-                rounded='md'
-                shadow='md'
-              >
-                <div className='text-xl font-semibold'>{notification.title}</div>
-                {
-                  notification.notification
-                }
-                <div className='flex flex-wrap justify-end text-sm items-center pr-4'>
-                  <Link passHref href={`/profile/0`}>
-                    <span className='cursor-pointer  hover:text-sky-400 flex gap-1 items-center p-4 underline'>
-                      {
-                        notification?.userID.image == null ? <Image src={avatar} alt="" width={24} height={24} />
-                          :
-                          <img className='rounded-xl border border-black cursor-pointer' src={`${notification?.userID.image}`} alt="" width={24} height={24} />
-                      }
-                      {notification?.userID.name}
+      <Collapse in={openEModal} animateOpacity className='pb-8'>
+        {emergencies.map((notification, idx) => {
+          if (idx % 2) {
+            return (
+              <>
+                <Box
+                  p='40px'
+                  color='#F7F5F2'
+                  mt='4'
+                  bg='#712B75'
+                  rounded='md'
+                  shadow='md'
+                >
+                  <div className='text-xl font-semibold'>{notification.title}</div>
+                  {
+                    notification.notification
+                  }
+                  <div className='flex flex-wrap justify-end text-sm items-center pr-4'>
+                    <Link passHref href={`/profile/0`}>
+                      <span className='cursor-pointer  hover:text-sky-400 flex gap-1 items-center p-4 underline'>
+                        {
+                          notification?.userID.image == null ? <Image src={avatar} alt="" width={24} height={24} />
+                            :
+                            <img className='rounded-xl border border-black cursor-pointer' src={`${notification?.userID.image}`} alt="" width={24} height={24} />
+                        }
+                        {notification?.userID.name}
+                      </span>
+                    </Link>
+                    <span className="font-semibold">
+                      {new Date(notification?.date).toLocaleString()}
                     </span>
-                  </Link>
-                  <span className="font-semibold">
-                    {new Date(notification?.date).toLocaleString()}
-                  </span>
-                </div>
-              </Box>
-            </>
-          )
-        }
-        else{
-          return (
-            <>
-              <Box
-                p='40px'
-                color='#F7F5F2 '
-                mt='4'
-                bg='#F24A72'
-                rounded='md'
-                shadow='md'
-              >
-                <div className='text-xl font-semibold'>{notification.title}</div>
-                {
-                  notification.notification
-                }
-                <div className='flex flex-wrap justify-end text-sm items-center pr-4'>
-                  <Link passHref href={`/profile/0`}>
-                    <span className='cursor-pointer  hover:text-sky-400 flex gap-1 items-center p-4 underline'>
-                      {
-                        notification?.userID.image == null ? <Image src={avatar} alt="" width={24} height={24} />
-                          :
-                          <img className='rounded-xl border border-black cursor-pointer' src={`${notification?.userID.image}`} alt="" width={24} height={24} />
-                      }
-                      {notification?.userID.name}
+                  </div>
+                </Box>
+              </>
+            )
+          }
+          else {
+            return (
+              <>
+                <Box
+                  p='40px'
+                  color='#F7F5F2 '
+                  mt='4'
+                  bg='#F24A72'
+                  rounded='md'
+                  shadow='md'
+                >
+                  <div className='text-xl font-semibold'>{notification.title}</div>
+                  {
+                    notification.notification
+                  }
+                  <div className='flex flex-wrap justify-end text-sm items-center pr-4'>
+                    <Link passHref href={`/profile/0`}>
+                      <span className='cursor-pointer  hover:text-sky-400 flex gap-1 items-center p-4 underline'>
+                        {
+                          notification?.userID.image == null ? <Image src={avatar} alt="" width={24} height={24} />
+                            :
+                            <img className='rounded-xl border border-black cursor-pointer' src={`${notification?.userID.image}`} alt="" width={24} height={24} />
+                        }
+                        {notification?.userID.name}
+                      </span>
+                    </Link>
+                    <span className="font-semibold">
+                      {new Date(notification?.date).toLocaleString()}
                     </span>
-                  </Link>
-                  <span className="font-semibold">
-                    {new Date(notification?.date).toLocaleString()}
-                  </span>
-                </div>
-              </Box>
-            </>
-          )
-        }
-      })}
+                  </div>
+                </Box>
+              </>
+            )
+          }
+        })}
+      </Collapse>
     </div>
 
 
@@ -241,7 +249,7 @@ export default function Home({ notifications,emergencyNotifications }) {
 
 
     <div className='flex mt-8'>
-      <Button onClick={onToggle} className='flex-1 flex' >
+      <Button onClick={onToggle} className={'flex-1 flex' + ` ${!isOpen ? 'mb-8' : ''}`} >
         <span className='flex-1'>
           Notifications ({normal.length})
         </span>
@@ -286,7 +294,7 @@ export default function Home({ notifications,emergencyNotifications }) {
             </>
           )
         }
-        else{
+        else {
           return (
             <>
               <Box
@@ -356,10 +364,10 @@ export async function getServerSideProps(context) {
 
   try {
     await dbConnect()
-    const notify = await notifications.find({type:'Normal'}).populate('userID').sort({date:-1})
-    const Enotify = await notifications.find({type:'Emergency'}).populate('userID').sort({date:-1})
+    const notify = await notifications.find({ type: 'Normal' }).populate('userID').sort({ date: -1 })
+    const Enotify = await notifications.find({ type: 'Emergency' }).populate('userID').sort({ date: -1 })
     return {
-      props: { notifications: JSON.stringify(notify) ,emergencyNotifications:JSON.stringify(Enotify)},
+      props: { notifications: JSON.stringify(notify), emergencyNotifications: JSON.stringify(Enotify) },
     }
 
   } catch (error) {
