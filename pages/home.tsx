@@ -10,6 +10,7 @@ import Image from 'next/image';
 import avatar from '../images/avatar2.svg'
 import nnr from '../images/nnr.png'
 import notify from '../images/notify.png'
+import { GrClose } from "react-icons/gr";
 
 import er from '../images/emergencyr.png'
 
@@ -114,6 +115,7 @@ const TheModal = ({ isOpen, setOpen, session }) => {
 export default function Home({ notifications, emergencyNotifications }) {
   notifications = JSON.parse(notifications)
   emergencyNotifications = JSON.parse(emergencyNotifications)
+  // console.log(notifications)
 
   const { data: session, status } = useSession()
   const [openModal, setOpenModal] = useState(false);
@@ -131,9 +133,14 @@ export default function Home({ notifications, emergencyNotifications }) {
     const channel = pusher.subscribe("Notification");
 
     channel.bind("normal-notify-event", function (data) {
+      // alert("N")
+      // console.log("N:",data)
       setNormal([data, ...normal])
     });
     channel.bind("emergency-notify-event", function (data) {
+      // alert("E")
+      // console.log("E:",data)
+      setOpenEModal(true);
       setEmergencies([data, ...emergencies])
     });
 
@@ -145,6 +152,18 @@ export default function Home({ notifications, emergencyNotifications }) {
       pusher.unsubscribe("Notification");
     };
   }, []);
+
+  const removeNBox = (idx)=>{
+    setNormal((list)=>{
+        return list.filter((_,i)=>idx!==i);
+    })
+  }
+
+  const removeEBox = (idx)=>{
+    setEmergencies((list)=>{
+        return list.filter((_,i)=>idx!==i);
+    })
+  }
 
   return <>
     <TheModal isOpen={openModal} setOpen={setOpenModal} session={session} />
@@ -186,12 +205,13 @@ export default function Home({ notifications, emergencyNotifications }) {
                   rounded='md'
                   shadow='md'
                 >
+                  <div className='flex justify-end cursor-pointer' onClick={()=>removeEBox(idx)} ><GrClose size={20}/></div>
                   <div className='text-xl font-semibold'>{notification.title}</div>
                   {
                     notification.notification
                   }
                   <div className='flex flex-wrap justify-end text-sm items-center pr-4'>
-                    <Link passHref href={`/profile/0`}>
+                    <Link passHref href={`/profile/${notification?.userID._id}`}>
                       <span className='cursor-pointer  hover:text-sky-400 flex gap-1 items-center p-4 underline'>
                         {
                           notification?.userID.image == null ? <Image src={avatar} alt="" width={24} height={24} />
@@ -220,12 +240,13 @@ export default function Home({ notifications, emergencyNotifications }) {
                   rounded='md'
                   shadow='md'
                 >
+                  <div className='flex justify-end cursor-pointer' onClick={()=>removeEBox(idx)}><GrClose size={20}/></div>
                   <div className='text-xl font-semibold'>{notification.title}</div>
                   {
                     notification.notification
                   }
                   <div className='flex flex-wrap justify-end text-sm items-center pr-4'>
-                    <Link passHref href={`/profile/0`}>
+                    <Link passHref href={`/profile/${notification?.userID._id}`}>
                       <span className='cursor-pointer  hover:text-sky-400 flex gap-1 items-center p-4 underline'>
                         {
                           notification?.userID.image == null ? <Image src={avatar} alt="" width={24} height={24} />
@@ -246,19 +267,6 @@ export default function Home({ notifications, emergencyNotifications }) {
         })}
       </Collapse>
     </div>
-
-
-    {/* <div className='flex justify-center items-center flex-col'>
-      {
-        emergencies.length ? null : (
-          <>
-            <div className='font-semibold text-xl'> No Emergencies</div>
-            <Image src={er} alt="" width={300} height={300} />
-          </>
-        )
-      }
-    </div> */}
-
 
     <div className='flex mt-8'>
       <Button onClick={onToggle} className={'flex-1 flex' + ` ${!isOpen ? 'mb-8' : ''}`} >
@@ -283,12 +291,13 @@ export default function Home({ notifications, emergencyNotifications }) {
                 rounded='md'
                 shadow='md'
               >
+                <div className='flex justify-end cursor-pointer' onClick={()=>removeNBox(idx)} ><GrClose size={20}/></div>
                 <div className='text-xl font-semibold'>{notification.title}</div>
                 {
                   notification.notification
                 }
                 <div className='flex flex-wrap justify-end text-sm items-center pr-4'>
-                  <Link passHref href={`/profile/0`}>
+                  <Link passHref href={`/profile/${notification?.userID._id}`}>
                     <span className='cursor-pointer text-black hover:text-sky-400 flex gap-1 items-center p-4 underline'>
                       {
                         notification?.userID.image == null ? <Image src={avatar} alt="" width={24} height={24} />
@@ -317,12 +326,13 @@ export default function Home({ notifications, emergencyNotifications }) {
                 rounded='md'
                 shadow='md'
               >
+                <div className='flex justify-end cursor-pointer' onClick={()=>removeNBox(idx)} ><GrClose size={20}/></div>
                 <div className='text-xl font-semibold'>{notification.title}</div>
                 {
                   notification.notification
                 }
                 <div className='flex flex-wrap justify-end text-sm items-center pr-4'>
-                  <Link passHref href={`/profile/0`}>
+                  <Link passHref href={`/profile/${notification?.userID._id}`}>
                     <span className='cursor-pointer  hover:text-sky-400 flex gap-1 items-center p-4 underline'>
                       {
                         notification?.userID.image == null ? <Image src={avatar} alt="" width={24} height={24} />

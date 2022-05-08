@@ -64,7 +64,7 @@ export default nextAuth(
 		callbacks:
 		{
 			async signIn({ user, account, profile, email, credentials }) {
-				console.log(account, profile, email, credentials)
+				// console.log(account, profile, email, credentials)
 				let userEmail = null
 				if (account.type === 'email') {
 					userEmail = account.providerAccountId
@@ -74,7 +74,7 @@ export default nextAuth(
 					userEmail = profile.email
 				}
 				let domain = userEmail?.split('@')[1]
-				console.log(domain)
+				// console.log(domain)
 				return domain === 'iiitm.ac.in'
 				// return true
 			},

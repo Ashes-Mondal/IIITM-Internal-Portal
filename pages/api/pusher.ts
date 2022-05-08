@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 		return
 	}
 	//*Client is signedIn
-	console.log(req.body,user)
+	// console.log(req.body,user)
 	const { title, notification, value } = req.body;
 	let doc = await notifications.create({userID:id,title,notification,type:value?'Emergency':'Normal'})
 	doc = await doc.populate('userID')
