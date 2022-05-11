@@ -180,7 +180,7 @@ const TheModal = ({ isOpen, setOpen, session, pid = null }) => {
 	};
 
 	useEffect(() => {
-		if (pid) {
+		if (isOpen && pid) {
 			axios.get(`/api/fetch/product?id=${pid}`)
 				.then(resp => {
 					const data = resp.data.data
@@ -194,7 +194,7 @@ const TheModal = ({ isOpen, setOpen, session, pid = null }) => {
 					console.error(e)
 				})
 		}
-	}, [])
+	}, [isOpen])
 
 	return (
 		<>
