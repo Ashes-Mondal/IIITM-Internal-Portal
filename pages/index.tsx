@@ -13,7 +13,7 @@ const errors: Record<string, string> = {
 	'EmailCreateAccount': "Try signing with a different account.",
 	'Callback': "Try signing with a different account.",
 	'OAuthAccountNotLinked': "To confirm your identity, sign in with the same account you used originally.",
-	'EmailSignin': "Check your email address.",
+	'EmailSignin': "Internal Server Error!.",
 	'CredentialsSignin': "Sign in failed. Check the details you provided are correct.",
 	'SessionRequired': `Session expired, LogIn to continue.`,
 	'AccessDenied': "Access Denied, Please Login with institute email.",
